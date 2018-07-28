@@ -6,7 +6,7 @@ from scipy.spatial import distance_matrix
 # === Parameter
 NA  =2
 NXYZ=3
-R0=1.25
+R0=0.3
 
 #RMIN=-0.3
 #RMAX= 0.3
@@ -47,7 +47,6 @@ def calcS(r):
 def calcT(r): 
    return np.exp(-r)*(1.+r-r*r/3.)*0.5
 
-# --> cython
 def calcVen(r,rn): 
    na=rn.shape[0]
    nb= r.shape[0]
@@ -56,11 +55,11 @@ def calcVen(r,rn):
    for i in range(nb): 
       for j in range(nb): 
          for ia in range(na):
-            v[i,j]+=calcVGTO(rn[ia],r[i],r[j])
+            v[i,j]+=calcVenGTO(rn[ia],r[i],r[j])
 
    return v
 
-def calcVGTO(rc,ra,rb): 
+def calcVenGTO(rc,ra,rb): 
    cc=np.array(CC)
    oc=np.array(OC)
    ngau=cc.shape[0]
@@ -133,21 +132,14 @@ def calcX_THX(r,rb):
 
 def calcEnergy(h,x,r): 
    e,vec=np.linalg.eig(h)
-
    e +=calcVnn(r) 
    e  =np.sort(e)
-   xm1=np.linalg.inv(x)
-   vec=xm1@vec
+   vec=x@vec
 
    return e,vec
 
-# <--- cython
 def main(): 
    r,rb=loadNuCoord()
-# test 
-#   rb[0,2]=-1.25
-#   rb[1,2]= 1.25
-# test 
    x_thx,x=calcX_THX(r,rb)
    e_mo,vec_mo=calcEnergy(x_thx,x,r)
 
